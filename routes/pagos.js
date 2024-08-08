@@ -1,4 +1,4 @@
-// routes/pagos.js
+// routes\pagos.js
 
 const express = require('express');
 const router = express.Router();

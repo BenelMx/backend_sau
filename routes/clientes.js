@@ -1,4 +1,5 @@
-// routes/clientes.js
+// routes\clientes.js
+
 const express = require('express');
 const router = express.Router();
 
