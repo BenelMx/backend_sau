@@ -1,116 +1,75 @@
+// routes/pagos.js
+
 const express = require('express');
 const router = express.Router();
-const mysql = require('mysql2');
-const multer = require('multer');
-const path = require('path');
 
-// Configuración de multer para la carga de archivos
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, 'uploads/'); // Carpeta donde se guardarán los archivos
-  },
-  filename: (req, file, cb) => {
-    cb(null, Date.now() + path.extname(file.originalname)); // Nombre del archivo
-  }
-});
+module.exports = (db) => {
 
-const upload = multer({ storage });
-
-// Configuración de la conexión a la base de datos
-const db = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'sau'
-});
-
-// Conectar a la base de datos
-db.connect(err => {
-  if (err) {
-    console.error('Error connecting to the database:', err);
-    return;
-  }
-  console.log('Connected to the database');
-});
-
-// Obteniendo todos los pagos en el backend
-router.get('/', (req, res) => {
-  const sql = 'SELECT * FROM Pagos';
-  db.query(sql, (err, result) => {
-    if (err) {
+  // Obtener todos los pagos
+  router.get('/', async (req, res) => {
+    try {
+      const [result] = await db.query('SELECT * FROM pagos');
+      res.json(result);
+    } catch (err) {
       console.error('Error fetching payments:', err);
-      return res.status(500).send('Error fetching payments');
+      res.status(500).send('Error fetching payments');
     }
-    res.json(result);
   });
-});
 
-// Agregar un nuevo pago
-router.post('/', upload.single('comprobante'), (req, res) => {
-  const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe } = req.body;
-  const comprobante = req.file ? req.file.path : null; // Ruta del archivo cargado
+  // Agregar un nuevo pago
+  router.post('/', async (req, res) => {
+    const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante } = req.body;
 
-  const sql = 'INSERT INTO Pagos (fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante) VALUES (?, ?, ?, ?, ?, ?)';
+    // Validación de entradas
+    if (!Clientes_pppoe || !monto || !fecha_pago) {
+      return res.status(400).json({ error: 'Faltan datos requeridos' });
+    }
 
-  const values = [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante];
-
-  db.query(sql, values, (err, result) => {
-    if (err) {
+    try {
+      const sql = `INSERT INTO pagos 
+        (fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante)
+        VALUES (?, ?, ?, ?, ?, ?)`;
+      const values = [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante];
+      
+      const [result] = await db.query(sql, values);
+      res.status(201).json({ id: result.insertId, ...req.body });
+    } catch (err) {
       console.error('Error adding payment:', err);
-      return res.status(500).json({ error: 'Error adding payment' });
+      res.status(500).json({ error: 'Error adding payment' });
     }
-    res.status(201).json({
-      fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante
-    });
   });
-});
 
-// Actualizar un pago existente
-router.put('/:id_pagos', upload.single('comprobante'), (req, res) => {
-  const { id_pagos } = req.params;
-  const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe } = req.body;
-  const comprobante = req.file ? req.file.path : null; // Ruta del archivo cargado
+  // Actualizar un pago existente
+  router.put('/:id', async (req, res) => {
+    const { id } = req.params;
+    const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante } = req.body;
 
-  const sql = 'UPDATE Pagos SET fecha_pago = ?, monto = ?, referencia_bancaria = ?, descripcion = ?, Clientes_pppoe = ?, comprobante = ? WHERE id_pagos = ?';
-
-  const values = [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante, id_pagos];
-
-  db.query(sql, values, (err, result) => {
-    if (err) {
+    try {
+      const sql = `UPDATE pagos SET 
+        fecha_pago = ?, monto = ?, referencia_bancaria = ?, descripcion = ?, Clientes_pppoe = ?, comprobante = ?
+        WHERE id_pagos = ?`;
+      const values = [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante, id];
+      
+      await db.query(sql, values);
+      res.send('Payment updated successfully');
+    } catch (err) {
       console.error('Error updating payment:', err);
-      return res.status(500).send('Error updating payment');
+      res.status(500).send('Error updating payment');
     }
-    res.send('Payment updated successfully');
   });
-});
 
-// Eliminar un pago existente
-router.delete('/:id_pagos', (req, res) => {
-  const { id_pagos } = req.params;
+  // Eliminar un pago existente
+  router.delete('/:id', async (req, res) => {
+    const { id } = req.params;
 
-  const sql = 'DELETE FROM Pagos WHERE id_pagos = ?';
-
-  db.query(sql, [id_pagos], (err, result) => {
-    if (err) {
+    try {
+      await db.query('DELETE FROM pagos WHERE id_pagos = ?', [id]);
+      res.send('Payment deleted successfully');
+    } catch (err) {
       console.error('Error deleting payment:', err);
-      return res.status(500).send('Error deleting payment');
+      res.status(500).send('Error deleting payment');
     }
-    res.send('Payment deleted successfully');
   });
-});
 
-// Obtener todos los PPPoE disponibles desde la tabla 'clientes'
-router.get('/pppoe', (req, res) => {
-  const sql = 'SELECT pppoe FROM clientes';
-  db.query(sql, (err, result) => {
-    if (err) {
-      console.error('Error fetching PPPoE:', err);
-      return res.status(500).send('Error fetching PPPoE');
-    }
-    // Devuelve solo un array de pppoe
-    const pppoeList = result.map(row => row.pppoe);
-    res.json(pppoeList);
-  });
-});
-
-module.exports = router;
+  return router;
+};
