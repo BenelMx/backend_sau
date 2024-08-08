@@ -1,10 +1,9 @@
-// routes\pagos.js
+// routes/pagos.js
 
 const express = require('express');
 const router = express.Router();
 
 module.exports = (db) => {
-
   // Obtener todos los pagos
   router.get('/', async (req, res) => {
     try {
