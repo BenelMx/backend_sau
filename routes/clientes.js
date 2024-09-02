@@ -28,6 +28,17 @@ module.exports = (db) => {
     }
   });
 
+  // Obtener opciones de PPPoE con filtrado
+  router.get('/pppoe', async (req, res) => {
+    const { query } = req.query;
+    try {
+      const [rows] = await db.query('SELECT DISTINCT pppoe FROM clientes WHERE pppoe LIKE ?', [`%${query}%`]);
+      res.json(rows.map(row => row.pppoe));
+    } catch (error) {
+      res.status(500).json({ error: 'Error retrieving PPPoE options' });
+    }
+  });
+
   // Crear un nuevo cliente
   router.post('/', async (req, res) => {
     const { pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, extras, observaciones, status } = req.body;
