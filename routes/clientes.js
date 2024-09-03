@@ -39,7 +39,7 @@ module.exports = (db) => {
     }
   });
 
-  // Crear un nuevo cliente
+  // Crea un nuevo cliente
   router.post('/', async (req, res) => {
     const { pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, extras, observaciones, status } = req.body;
     try {
@@ -53,7 +53,7 @@ module.exports = (db) => {
     }
   });
 
-  // Actualizar un cliente existente
+  // Actualiza un cliente existente
   router.put('/:pppoe', async (req, res) => {
     const { pppoe } = req.params;
     const { nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, extras, observaciones, status } = req.body;
@@ -68,7 +68,7 @@ module.exports = (db) => {
     }
   });
 
-  // Eliminar un cliente
+  // Elimina un cliente
   router.delete('/:pppoe', async (req, res) => {
     try {
       await db.query('DELETE FROM clientes WHERE pppoe = ?', [req.params.pppoe]);

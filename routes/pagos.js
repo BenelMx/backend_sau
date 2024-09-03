@@ -38,7 +38,7 @@ module.exports = (db) => {
     }
   });
 
-  // Actualizar un pago existente
+  // Actualiza un pago existente
   router.put('/:id', async (req, res) => {
     const { id } = req.params;
     const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante } = req.body;
@@ -57,7 +57,7 @@ module.exports = (db) => {
     }
   });
 
-  // Eliminar un pago existente
+  // Elimina un pago existente
   router.delete('/:id', async (req, res) => {
     const { id } = req.params;
 
