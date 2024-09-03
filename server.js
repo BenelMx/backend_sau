@@ -30,9 +30,11 @@ async function initializeDbConnection() {
     // Importa las rutas de clientes y pagos después de establecer la conexión
     const clientesRoutes = require('./routes/clientes')(db);
     const pagosRoutes = require('./routes/pagos')(db);
+    const soporteRoutes = require('./routes/soporte')(db);
 
     app.use('/api/clientes', clientesRoutes);
     app.use('/api/pagos', pagosRoutes);
+    app.use('/api/soporte', soporteRoutes);
 
     // Middleware para servir archivos estáticos
     app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
