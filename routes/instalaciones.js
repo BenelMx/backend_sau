@@ -17,18 +17,18 @@ module.exports = (db) => {
 
   // Agregar un nuevo registro de soporte
   router.post('/', async (req, res) => {
-    const { fecha_instalación, descripcion, observación, fotos, costo_instalacion, status, Clientes_ppoe } = req.body;
+    const { fecha_instalacion, descripcion, observacion, fotos, costo_instalacion, status, Clientes_ppoe } = req.body;
 
     // Validación de entradas
-    if (!fecha_instalación || !descripcion || !observación || !fotos || !costo_instalacion || !status || !Clientes_ppoe) {
+    if (!fecha_instalacion || !descripcion || !observacion || !fotos || !costo_instalacion || !status || !Clientes_ppoe) {
       return res.status(400).json({ error: 'Faltan datos requeridos' });
     }
 
     try {
       const sql = `INSERT INTO instalaciones 
-        (fecha_instalación, descripcion, observación, fotos, costo_instalacion, status, Clientes_ppoe)
+        (fecha_instalacion, descripcion, observacion, fotos, costo_instalacion, status, Clientes_ppoe)
         VALUES (?, ?, ?, ?)`;
-      const values = [fecha_instalación, descripcion, observación, fotos, costo_instalacion, status, Clientes_ppoe];
+      const values = [fecha_instalacion, descripcion, observacion, fotos, costo_instalacion, status, Clientes_ppoe];
       
       const [result] = await db.query(sql, values);
       res.status(201).json({ id_instalaciones: result.insertId, ...req.body });
@@ -41,18 +41,18 @@ module.exports = (db) => {
   // Actualizar un registro de instalaciones existentes
   router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { fecha_instalación, descripcion, observación, fotos, costo_instalacion, status, Clientes_ppoe } = req.body;
+    const { fecha_instalacion, descripcion, observacion, fotos, costo_instalacion, status, Clientes_ppoe } = req.body;
 
     // Validación de entradas
-    if (!fecha_instalación || !descripcion || !observación || !fotos || !costo_instalacion || !status || !Clientes_ppoe) {
+    if (!fecha_instalacion || !descripcion || !observacion || !fotos || !costo_instalacion || !status || !Clientes_ppoe) {
       return res.status(400).json({ error: 'Faltan datos requeridos' });
     }
 
     try {
       const sql = `UPDATE instalaciones SET 
-        fecha_instalación = ?, descripcion = ?, observación = ?, fotos, costo_instalacion = ?, status = ?, Clientes_ppoe = ? = ?
+        fecha_instalacion = ?, descripcion = ?, observacion = ?, fotos, costo_instalacion = ?, status = ?, Clientes_ppoe = ? = ?
         WHERE id_instalaciones = ?`;
-      const values = [fecha_instalación, descripcion, observación, fotos, costo_instalacion, status, Clientes_ppoe, id];
+      const values = [fecha_instalacion, descripcion, observacion, fotos, costo_instalacion, status, Clientes_ppoe, id];
       
       await db.query(sql, values);
       res.send('Installations record updated successfully');
