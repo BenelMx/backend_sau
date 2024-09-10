@@ -4,10 +4,10 @@ const express = require('express');
 const router = express.Router();
 
 module.exports = (db) => {
-  // Obtener todos los clientes
-  router.get('/', async (req, res) => {
-    try {
-      const [rows] = await db.query('SELECT * FROM clientes');
+    // Obtener todos los clientes
+    router.get('/', async (req, res) => {
+        try {
+            const [rows] = await db.query('SELECT * FROM clientes');
             res.json(rows);
         } catch (error) {
             res.status(500).json({ error: 'Error retrieving clients' });
@@ -41,11 +41,11 @@ module.exports = (db) => {
 
     // Crea un nuevo cliente
     router.post('/', async (req, res) => {
-        const { pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, extras, observaciones, status } = req.body;
+        const { pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia } = req.body;
         try {
             await db.query(
-                'INSERT INTO clientes (pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, extras, observaciones, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, extras, observaciones, status]
+                'INSERT INTO clientes (pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia]
             );
             res.status(201).json({ message: 'Client created' });
         } catch (error) {
@@ -56,11 +56,11 @@ module.exports = (db) => {
     // Actualiza un cliente existente
     router.put('/:pppoe', async (req, res) => {
         const { pppoe } = req.params;
-        const { nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, extras, observaciones, status } = req.body;
+        const { nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia } = req.body;
         try {
             await db.query(
-                'UPDATE clientes SET nombres = ?, apellidos = ?, ciudad = ?, direccion = ?, estado = ?, telefono = ?, email = ?, fecha_registro = ?, fecha_corte = ?, tipo_paquete = ?, monto_mensual = ?, extras = ?, observaciones = ?, status = ? WHERE pppoe = ?',
-                [nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, extras, observaciones, status, pppoe]
+                'UPDATE clientes SET nombres = ?, apellidos = ?, ciudad = ?, direccion = ?, estado = ?, telefono = ?, email = ?, fecha_registro = ?, fecha_corte = ?, tipo_paquete = ?, monto_mensual = ?, municipio = ?, observaciones = ?, status = ?, celula = ?, cuenta_depositar = ?, numero_referencia = ? WHERE pppoe = ?',
+                [nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia, pppoe]
             );
             res.json({ message: 'Client updated' });
         } catch (error) {
