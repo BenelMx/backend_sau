@@ -8,7 +8,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3006;
+const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -23,7 +23,8 @@ async function initializeDbConnection() {
             user: process.env.DB_USER,
             password: process.env.DB_PASS,
             database: process.env.DB_NAME,
-            connectionLimit: 10
+            port: process.env.DB_PORT,
+            connectionLimit: 20
         });
         console.log('Connected to the database');
 
