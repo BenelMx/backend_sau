@@ -33,6 +33,20 @@ module.exports = (db) => {
         }
     });
 
+    // Obtener los estados únicos de los clientes
+    router.get('/estado', async (req, res) => {
+        try {
+            const [rows] = await db.query('SELECT DISTINCT estado FROM clientes');
+            if (rows.length > 0) {
+                res.json(rows.map(row => row.estado));
+            } else {
+                res.status(404).json({ error: 'No cells found' });
+            }
+        } catch (error) {
+            res.status(500).json({ error: 'Error retrieving cells' });
+        }
+    });
+
     // Obtener las ciudades/municipios únicos de los clientes
     router.get('/ciudad', async (req, res) => {
         try {
