@@ -4,6 +4,77 @@ const express = require('express');
 const router = express.Router();
 
 module.exports = (db) => {
+
+    // Obtener las células únicas de los clientes
+    router.get('/celulas', async (req, res) => {
+        try {
+            const [rows] = await db.query('SELECT DISTINCT celula FROM clientes');
+            if (rows.length > 0) {
+                res.json(rows.map(row => row.celula));
+            } else {
+                res.status(404).json({ error: 'No cells found' });
+            }
+        } catch (error) {
+            res.status(500).json({ error: 'Error retrieving cells' });
+        }
+    });
+
+    // Obtener los status únicos de los clientes
+    router.get('/status', async (req, res) => {
+        try {
+            const [rows] = await db.query('SELECT DISTINCT status FROM clientes');
+            if (rows.length > 0) {
+                res.json(rows.map(row => row.status));
+            } else {
+                res.status(404).json({ error: 'No cells found' });
+            }
+        } catch (error) {
+            res.status(500).json({ error: 'Error retrieving cells' });
+        }
+    });
+
+    // Obtener los estados únicos de los clientes
+    router.get('/estado', async (req, res) => {
+        try {
+            const [rows] = await db.query('SELECT DISTINCT estado FROM clientes');
+            if (rows.length > 0) {
+                res.json(rows.map(row => row.estado));
+            } else {
+                res.status(404).json({ error: 'No cells found' });
+            }
+        } catch (error) {
+            res.status(500).json({ error: 'Error retrieving cells' });
+        }
+    });
+
+    // Obtener las ciudades/municipios únicos de los clientes
+    router.get('/ciudad', async (req, res) => {
+        try {
+            const [rows] = await db.query('SELECT DISTINCT ciudad FROM clientes');
+            if (rows.length > 0) {
+                res.json(rows.map(row => row.ciudad));
+            } else {
+                res.status(404).json({ error: 'No cells found' });
+            }
+        } catch (error) {
+            res.status(500).json({ error: 'Error retrieving cells' });
+        }
+    });
+
+    // Obtener los pppoe únicas de los clientes
+    router.get('/pppoe', async (req, res) => {
+        try {
+            const [rows] = await db.query('SELECT DISTINCT pppoe FROM clientes');
+            if (rows.length > 0) {
+                res.json(rows.map(row => row.pppoe));
+            } else {
+                res.status(404).json({ error: 'No cells found' });
+            }
+        } catch (error) {
+            res.status(500).json({ error: 'Error retrieving cells' });
+        }
+    });
+
     // Obtener todos los clientes
     router.get('/', async (req, res) => {
         try {
@@ -25,17 +96,6 @@ module.exports = (db) => {
             }
         } catch (error) {
             res.status(500).json({ error: 'Error retrieving client' });
-        }
-    });
-
-    // Obtener opciones de PPPoE con filtrado
-    router.get('/pppoe', async (req, res) => {
-        const { query } = req.query;
-        try {
-            const [rows] = await db.query('SELECT DISTINCT pppoe FROM clientes WHERE pppoe LIKE ?', [`%${query}%`]);
-            res.json(rows.map(row => row.pppoe));
-        } catch (error) {
-            res.status(500).json({ error: 'Error retrieving PPPoE options' });
         }
     });
 

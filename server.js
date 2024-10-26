@@ -8,7 +8,7 @@ const path = require('path');
 require('dotenv').config();
 
 const app = express();
-const port = process.env.PORT || 3006;
+const port = process.env.PORT || 3001;
 
 app.use(cors());
 app.use(bodyParser.json());
@@ -23,16 +23,21 @@ async function initializeDbConnection() {
             user: process.env.DB_USER,
             password: process.env.DB_PASS,
             database: process.env.DB_NAME,
-            connectionLimit: 10
+            port: process.env.DB_PORT,
+            connectionLimit: 20
         });
         console.log('Connected to the database');
 
         const clientesRoutes = require('./routes/clientes')(db);
         const pagosRoutes = require('./routes/pagos')(db);
         const authRoutes = require('./routes/auth')(db);
+        const soporteRoutes = require('./routes/soporte')(db);
+        const instalacionesRoutes = require('./routes/instalaciones')(db);
 
         app.use('/api/clientes', clientesRoutes);
         app.use('/api/pagos', pagosRoutes);
+        app.use('/api/soporte',soporteRoutes);
+        app.use('/api/instalaciones', instalacionesRoutes);
         app.use('/api/auth', authRoutes); // Aquí estás configurando la ruta de autenticación
         app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
         app.listen(port, () => {
