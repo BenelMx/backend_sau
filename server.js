@@ -31,9 +31,13 @@ async function initializeDbConnection() {
         const clientesRoutes = require('./routes/clientes')(db);
         const pagosRoutes = require('./routes/pagos')(db);
         const authRoutes = require('./routes/auth')(db);
+        const soporteRoutes = require('./routes/soporte')(db);
+        const instalacionesRoutes = require('./routes/instalaciones')(db);
 
         app.use('/api/clientes', clientesRoutes);
         app.use('/api/pagos', pagosRoutes);
+        app.use('/api/soporte',soporteRoutes);
+        app.use('/api/instalaciones', instalacionesRoutes);
         app.use('/api/auth', authRoutes); // Aquí estás configurando la ruta de autenticación
         app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
         app.listen(port, () => {

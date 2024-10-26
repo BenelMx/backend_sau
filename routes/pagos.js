@@ -37,7 +37,7 @@ module.exports = (db) => {
         const { pppoe } = req.params;
 
         try {
-            const sql = `SELECT nombres, apellidos, estado, municipio, celula, cuenta_depositar, numero_referencia 
+            const sql = `SELECT nombres, apellidos, estado, ciudad, celula, cuenta_depositar, numero_referencia 
                          FROM clientes 
                          WHERE pppoe = ?`;
             const [result] = await db.query(sql, [pppoe]);
