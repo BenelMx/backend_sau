@@ -15,6 +15,7 @@ module.exports = (db) => {
         }
     });
 
+
     // Obtener PPPoE filtrados desde la tabla clientes
     router.get('/pppoe', async (req, res) => {
         const searchTerm = req.query.search || '';
@@ -37,7 +38,7 @@ module.exports = (db) => {
         const { pppoe } = req.params;
 
         try {
-            const sql = `SELECT nombres, apellidos, estado, ciudad, celula 
+            const sql = `SELECT nombres, apellidos, estado, ciudad, direccion, tipo_paquete
                          FROM clientes 
                          WHERE pppoe = ?`;
             const [result] = await db.query(sql, [pppoe]);
@@ -55,17 +56,17 @@ module.exports = (db) => {
 
     // Agregar un nuevo registro de soporte
     router.post('/', async (req, res) => {
-        const { fecha_instalacion, descripcion, observacion, fotos, costo_instalacion, Clientes_pppoe } = req.body;
+        const { fecha_instalacion, observacion, fotos, costo_instalacion, Clientes_pppoe } = req.body;
         
-        if (!fecha_instalacion || !descripcion || !observacion || !fotos || !costo_instalacion || !Clientes_pppoe) {
+        if (!fecha_instalacion || !observacion || !fotos || !costo_instalacion || !Clientes_pppoe) {
             return res.status(400).json({ error: 'Faltan datos requeridos' });
         }
 
         try {
             const sql = `INSERT INTO instalaciones 
-            (fecha_instalacion, descripcion, observacion, fotos, costo_instalacion, Clientes_pppoe)
-            VALUES (?, ?, ?, ?, ?, ?)`;
-            const values = [fecha_instalacion, descripcion, observacion, fotos, costo_instalacion, Clientes_pppoe];
+            (fecha_instalacion, observacion, fotos, costo_instalacion, Clientes_pppoe)
+            VALUES (?, ?, ?, ?, ?)`;
+            const values = [fecha_instalacion, observacion, fotos, costo_instalacion, Clientes_pppoe];
             const [result] = await db.query(sql, values);
             res.status(201).json({ id_instalaciones: result.insertId, ...req.body });
         } catch (err) {

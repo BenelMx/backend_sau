@@ -15,6 +15,34 @@ module.exports = (db) => {
     }
   });
 
+  // Obtener los niveles únicos de los clientes
+  router.get('/nivel', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT DISTINCT nivel_soporte FROM soporte');
+        if (rows.length > 0) {
+            res.json(rows.map(row => row.nivel_soporte));
+        } else {
+            res.status(404).json({ error: 'No cells found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Error retrieving cells' });
+    }
+  });
+
+  // Obtener los status únicos de los clientes
+  router.get('/status', async (req, res) => {
+    try {
+        const [rows] = await db.query('SELECT DISTINCT status FROM soporte');
+        if (rows.length > 0) {
+            res.json(rows.map(row => row.status));
+        } else {
+            res.status(404).json({ error: 'No cells found' });
+        }
+    } catch (error) {
+        res.status(500).json({ error: 'Error retrieving cells' });
+    }
+  });
+
   // Obtener PPPoE filtrados desde la tabla clientes
   router.get('/pppoe', async (req, res) => {
     const searchTerm = req.query.search || '';
@@ -37,7 +65,7 @@ module.exports = (db) => {
     const { pppoe } = req.params;
 
     try {
-        const sql = `SELECT nombres, apellidos, estado, ciudad, celula 
+        const sql = `SELECT nombres, apellidos, telefono, estado, ciudad, celula 
                      FROM clientes 
                      WHERE pppoe = ?`;
         const [result] = await db.query(sql, [pppoe]);
@@ -79,18 +107,18 @@ module.exports = (db) => {
   // Actualizar un registro de soporte existente
   router.put('/:id', async (req, res) => {
     const { id } = req.params;
-    const { fecha_reporte, descripcion, status, Clientes_pppoe } = req.body;
+    const { fecha_reporte, descripcion, status, Clientes_pppoe, nivel_soporte } = req.body;
 
     // Validación de entradas
-    if (!fecha_reporte || !descripcion || !status || !Clientes_pppoe) {
+    if (!fecha_reporte || !descripcion || !status || !Clientes_pppoe || !nivel_soporte) {
       return res.status(400).json({ error: 'Faltan datos requeridos' });
     }
 
     try {
       const sql = `UPDATE soporte SET 
-        fecha_reporte = ?, descripcion = ?, status = ?, Clientes_pppoe = ?
+        fecha_reporte = ?, descripcion = ?, status = ?, Clientes_pppoe = ?, nivel_soporte = ?
         WHERE id_soporte = ?`;
-      const values = [fecha_reporte, descripcion, status, Clientes_pppoe, id];
+      const values = [fecha_reporte, descripcion, status, Clientes_pppoe, nivel_soporte, id];
       
       await db.query(sql, values);
       res.send('Support record updated successfully');
