@@ -78,18 +78,18 @@ module.exports = (db) => {
     // Actualizar un registro de instalaciones existente
     router.put('/:id', async (req, res) => {
         const { id } = req.params;
-        const { fecha_instalacion, descripcion, observacion, fotos, Clientes_pppoe, costo_instalacion } = req.body;
+        const { fecha_instalacion, observacion, fotos, Clientes_pppoe, costo_instalacion } = req.body;
     
         // Validación de entradas
-        if (!fecha_instalacion || !descripcion || !observacion || !fotos || !Clientes_pppoe || !costo_instalacion) {
+        if (!fecha_instalacion || !observacion || !fotos || !Clientes_pppoe || !costo_instalacion) {
           return res.status(400).json({ error: 'Faltan datos requeridos' });
         }
     
         try {
           const sql = `UPDATE instalaciones SET 
-            fecha_instalacion = ?, descripcion = ?, observacion = ?, fotos = ?, Clientes_pppoe = ?, costo_instalacion = ?
+            fecha_instalacion = ?, observacion = ?, fotos = ?, Clientes_pppoe = ?, costo_instalacion = ?
             WHERE id_instalaciones = ?`;
-          const values = [fecha_instalacion, descripcion, observacion, fotos, Clientes_pppoe, costo_instalacion, id];
+          const values = [fecha_instalacion, observacion, fotos, Clientes_pppoe, costo_instalacion, id];
           
           await db.query(sql, values);
           res.send('Support record updated successfully');
