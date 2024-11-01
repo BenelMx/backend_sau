@@ -2,6 +2,20 @@
 
 const express = require('express');
 const router = express.Router();
+const multer = require('multer');
+const path = require('path');
+
+// Configuración de multer para guardar archivos en la carpeta 'uploads'
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, 'uploads/');
+    },
+    filename: (req, file, cb) => {
+        cb(null, Date.now() + path.extname(file.originalname)); // Nombre único para el archivo
+    }
+});
+
+const upload = multer({ storage: storage });
 
 module.exports = (db) => {
     // Obtener todos los pagos
@@ -53,26 +67,24 @@ module.exports = (db) => {
         }
     });
 
-    // Agregar un nuevo pago
-    router.post('/', async (req, res) => {
-        const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante } = req.body;
-
-        // Validación de entradas
-        if (!Clientes_pppoe || !monto || !fecha_pago) {
-            return res.status(400).json({ error: 'Faltan datos requeridos' });
-        }
-
-        try {
-            const sql = `INSERT INTO pagos 
-            (fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante)
-            VALUES (?, ?, ?, ?, ?, ?)`;
-            const values = [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante];
+    // Agregar un nuevo pago con archivo
+    router.post('/', upload.single('comprobante'), async (req, res) => {
+        const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe } = req.body;
       
-            const [result] = await db.query(sql, values);
-            res.status(201).json({ id: result.insertId, ...req.body });
-        } catch (err) {
-            console.error('Error adding payment:', err);
-            res.status(500).json({ error: 'Error adding payment' });
+        // Verifica que todos los campos requeridos estén presentes
+        if (!fecha_pago || !monto || !Clientes_pppoe) {
+          return res.status(400).json({ error: 'Faltan campos requeridos' });
+        }
+      
+        try {
+          const [result] = await db.query(
+            'INSERT INTO pagos (fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante) VALUES (?, ?, ?, ?, ?, ?)',
+            [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, req.file ? req.file.filename : null]
+          );
+          res.status(201).json({ message: 'Pago agregado', id: result.insertId });
+        } catch (error) {
+          console.error('Error adding payment:', error);
+          res.status(500).json({ error: 'Error adding payment' });
         }
     });
 
