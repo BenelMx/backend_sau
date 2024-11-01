@@ -6,6 +6,7 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const path = require('path');
 require('dotenv').config();
+const multer = require('multer');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -15,6 +16,12 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 let db;
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => cb(null, 'uploads/'),
+    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
+});
+const upload = multer({ storage });
 
 async function initializeDbConnection() {
     try {
@@ -32,7 +39,7 @@ async function initializeDbConnection() {
         const pagosRoutes = require('./routes/pagos')(db);
         const authRoutes = require('./routes/auth')(db);
         const soporteRoutes = require('./routes/soporte')(db);
-        const instalacionesRoutes = require('./routes/instalaciones')(db);
+        const instalacionesRoutes = require('./routes/instalaciones')(db, upload);
 
         app.use('/api/clientes', clientesRoutes);
         app.use('/api/pagos', pagosRoutes);
@@ -40,10 +47,7 @@ async function initializeDbConnection() {
         app.use('/api/instalaciones', instalacionesRoutes);
         app.use('/api/auth', authRoutes); // Aquí estás configurando la ruta de autenticación
         app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-        app.listen(port, () => {
-            console.log(`Server running on port ${port}`);
-        });
-
+        app.listen(port, () => console.log(`Server running on port ${port}`));
     } catch (err) {
         console.error('Error connecting to the database:', err);
     }

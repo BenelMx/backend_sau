@@ -3,7 +3,14 @@
 const express = require('express');
 const router = express.Router();
 
-module.exports = (db) => {
+module.exports = (db, upload) => {
+
+    // Ruta para subir múltiples fotos de instalación
+    router.post('/upload', upload.array('fotos', 10), (req, res) => {
+        const fileUrls = req.files.map(file => `/uploads/${file.filename}`);
+        res.status(200).json({ urls: fileUrls });
+    });
+
     // Obtener todos los registros de instalaciones
     router.get('/', async (req, res) => {
         try {
@@ -54,10 +61,10 @@ module.exports = (db) => {
         }
     });
 
-    // Agregar un nuevo registro de soporte
+    // Guardar una instalación con URLs de fotos
     router.post('/', async (req, res) => {
         const { fecha_instalacion, observacion, fotos, costo_instalacion, Clientes_pppoe } = req.body;
-        
+
         if (!fecha_instalacion || !observacion || !fotos || !costo_instalacion || !Clientes_pppoe) {
             return res.status(400).json({ error: 'Faltan datos requeridos' });
         }
@@ -66,12 +73,12 @@ module.exports = (db) => {
             const sql = `INSERT INTO instalaciones 
             (fecha_instalacion, observacion, fotos, costo_instalacion, Clientes_pppoe)
             VALUES (?, ?, ?, ?, ?)`;
-            const values = [fecha_instalacion, observacion, fotos, costo_instalacion, Clientes_pppoe];
+            const values = [fecha_instalacion, observacion, JSON.stringify(fotos), costo_instalacion, Clientes_pppoe];
             const [result] = await db.query(sql, values);
             res.status(201).json({ id_instalaciones: result.insertId, ...req.body });
         } catch (err) {
-            console.error('Error adding installations record:', err.message, err.stack);
-            res.status(500).json({ error: 'Error adding installations record', details: err.message });
+            console.error('Error adding installations record:', err);
+            res.status(500).json({ error: 'Error adding installations record' });
         }
     });
 
@@ -109,6 +116,27 @@ module.exports = (db) => {
         } catch (err) {
             console.error('Error deleting installations record:', err);
             res.status(500).send('Error deleting installations record');
+        }
+    });
+
+    // Obtener detalles de la instalación con fotos
+    router.get('/:id', async (req, res) => {
+        const { id } = req.params;
+
+        try {
+            const sql = 'SELECT * FROM instalaciones WHERE id_instalaciones = ?';
+            const [result] = await db.query(sql, [id]);
+
+            if (result.length > 0) {
+                const installation = result[0];
+                installation.fotos = JSON.parse(installation.fotos); // Convertir a arreglo
+                res.json(installation);
+            } else {
+                res.status(404).send('Instalación no encontrada');
+            }
+        } catch (err) {
+            console.error('Error fetching installation data:', err);
+            res.status(500).send('Error fetching installation data');
         }
     });
 
