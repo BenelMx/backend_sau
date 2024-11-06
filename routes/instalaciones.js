@@ -96,7 +96,7 @@ module.exports = (db, upload) => {
           const sql = `UPDATE instalaciones SET 
             fecha_instalacion = ?, observacion = ?, fotos = ?, Clientes_pppoe = ?, costo_instalacion = ?
             WHERE id_instalaciones = ?`;
-          const values = [fecha_instalacion, observacion, fotos, Clientes_pppoe, costo_instalacion, id];
+            const values = [fecha_instalacion, observacion, JSON.stringify(fotos), Clientes_pppoe, costo_instalacion, id];
           
           await db.query(sql, values);
           res.send('Support record updated successfully');

@@ -36,7 +36,7 @@ async function initializeDbConnection() {
         console.log('Connected to the database');
 
         const clientesRoutes = require('./routes/clientes')(db);
-        const pagosRoutes = require('./routes/pagos')(db);
+        const pagosRoutes = require('./routes/pagos')(db, upload);
         const authRoutes = require('./routes/auth')(db);
         const soporteRoutes = require('./routes/soporte')(db);
         const instalacionesRoutes = require('./routes/instalaciones')(db, upload);
@@ -47,6 +47,7 @@ async function initializeDbConnection() {
         app.use('/api/instalaciones', instalacionesRoutes);
         app.use('/api/auth', authRoutes); // Aquí estás configurando la ruta de autenticación
         app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+        
         app.listen(port, () => console.log(`Server running on port ${port}`));
     } catch (err) {
         console.error('Error connecting to the database:', err);

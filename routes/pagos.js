@@ -2,22 +2,8 @@
 
 const express = require('express');
 const router = express.Router();
-const multer = require('multer');
-const path = require('path');
 
-// Configuración de multer para guardar archivos en la carpeta 'uploads'
-const storage = multer.diskStorage({
-    destination: (req, file, cb) => {
-        cb(null, 'uploads/');
-    },
-    filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname)); // Nombre único para el archivo
-    }
-});
-
-const upload = multer({ storage: storage });
-
-module.exports = (db) => {
+module.exports = (db, upload) => {
     // Obtener todos los pagos
     router.get('/', async (req, res) => {
         try {
@@ -34,8 +20,7 @@ module.exports = (db) => {
         const searchTerm = req.query.search || '';
 
         try {
-            const sql = `SELECT DISTINCT pppoe FROM clientes 
-                         WHERE pppoe LIKE ?`;
+            const sql = `SELECT DISTINCT pppoe FROM clientes WHERE pppoe LIKE ?`;
             const [result] = await db.query(sql, [`%${searchTerm}%`]);
 
             const pppoeList = result.map(row => row.pppoe);
@@ -52,8 +37,7 @@ module.exports = (db) => {
 
         try {
             const sql = `SELECT nombres, apellidos, estado, ciudad, celula, cuenta_depositar, numero_referencia 
-                         FROM clientes 
-                         WHERE pppoe = ?`;
+                         FROM clientes WHERE pppoe = ?`;
             const [result] = await db.query(sql, [pppoe]);
 
             if (result.length > 0) {
@@ -70,35 +54,33 @@ module.exports = (db) => {
     // Agregar un nuevo pago con archivo
     router.post('/', upload.single('comprobante'), async (req, res) => {
         const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe } = req.body;
-      
-        // Verifica que todos los campos requeridos estén presentes
+
         if (!fecha_pago || !monto || !Clientes_pppoe) {
-          return res.status(400).json({ error: 'Faltan campos requeridos' });
+            return res.status(400).json({ error: 'Faltan campos requeridos' });
         }
-      
+
         try {
-          const [result] = await db.query(
-            'INSERT INTO pagos (fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante) VALUES (?, ?, ?, ?, ?, ?)',
-            [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, req.file ? req.file.filename : null]
-          );
-          res.status(201).json({ message: 'Pago agregado', id: result.insertId });
+            const [result] = await db.query(
+                'INSERT INTO pagos (fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante) VALUES (?, ?, ?, ?, ?, ?)',
+                [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, req.file ? req.file.filename : null]
+            );
+            res.status(201).json({ message: 'Pago agregado', id: result.insertId });
         } catch (error) {
-          console.error('Error adding payment:', error);
-          res.status(500).json({ error: 'Error adding payment' });
+            console.error('Error adding payment:', error);
+            res.status(500).json({ error: 'Error adding payment' });
         }
     });
 
-    // Actualiza un pago existente
-    router.put('/:id', async (req, res) => {
+    // Actualizar un pago existente
+    router.put('/:id', upload.single('comprobante'), async (req, res) => {
         const { id } = req.params;
-        const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante } = req.body;
+        const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe } = req.body;
+        const comprobante = req.file ? req.file.filename : req.body.comprobante;
 
         try {
-            const sql = `UPDATE pagos SET 
-            fecha_pago = ?, monto = ?, referencia_bancaria = ?, descripcion = ?, Clientes_pppoe = ?, comprobante = ?
-            WHERE id_pagos = ?`;
+            const sql = `UPDATE pagos SET fecha_pago = ?, monto = ?, referencia_bancaria = ?, descripcion = ?, Clientes_pppoe = ?, comprobante = ? WHERE id_pagos = ?`;
             const values = [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante, id];
-      
+
             await db.query(sql, values);
             res.send('Payment updated successfully');
         } catch (err) {
@@ -107,7 +89,7 @@ module.exports = (db) => {
         }
     });
 
-    // Elimina un pago existente
+    // Eliminar un pago existente
     router.delete('/:id', async (req, res) => {
         const { id } = req.params;
 
