@@ -45,7 +45,7 @@ async function initializeDbConnection() {
         app.use('/api/pagos', pagosRoutes);
         app.use('/api/soporte',soporteRoutes);
         app.use('/api/instalaciones', instalacionesRoutes);
-        app.use('/api/auth', authRoutes); // Aquí estás configurando la ruta de autenticación
+        app.use('/api/auth', authRoutes);
         app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
         
         app.listen(port, () => console.log(`Server running on port ${port}`));

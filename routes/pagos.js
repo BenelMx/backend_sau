@@ -15,6 +15,15 @@ module.exports = (db, upload) => {
         }
     });
 
+    // Ruta para subir archivos de comprobantes
+    router.post('/upload', upload.single('comprobante'), (req, res) => {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No se proporcionó ningún archivo' });
+        }
+        const fileUrl = `/uploads/${req.file.filename}`;
+        res.status(200).json({ url: fileUrl });
+    });
+
     // Obtener PPPoE filtrados desde la tabla clientes
     router.get('/pppoe', async (req, res) => {
         const searchTerm = req.query.search || '';
@@ -52,22 +61,22 @@ module.exports = (db, upload) => {
     });
 
     // Agregar un nuevo pago con archivo
-    router.post('/', upload.single('comprobante'), async (req, res) => {
-        const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe } = req.body;
-
+    router.post('/', async (req, res) => {
+        const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante } = req.body;
+    
         if (!fecha_pago || !monto || !Clientes_pppoe) {
-            return res.status(400).json({ error: 'Faltan campos requeridos' });
+            return res.status(400).json({ error: 'Faltan datos requeridos' });
         }
-
+    
         try {
-            const [result] = await db.query(
-                'INSERT INTO pagos (fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante) VALUES (?, ?, ?, ?, ?, ?)',
-                [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, req.file ? req.file.filename : null]
-            );
-            res.status(201).json({ message: 'Pago agregado', id: result.insertId });
-        } catch (error) {
-            console.error('Error adding payment:', error);
-            res.status(500).json({ error: 'Error adding payment' });
+            const sql = `INSERT INTO pagos (fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante)
+                         VALUES (?, ?, ?, ?, ?, ?)`;
+            const values = [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante];
+            const [result] = await db.query(sql, values);
+            res.status(201).json({ id_pagos: result.insertId, ...req.body });
+        } catch (err) {
+            console.error('Error adding payment record:', err);
+            res.status(500).json({ error: 'Error adding payment record' });
         }
     });
 
