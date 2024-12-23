@@ -12,14 +12,13 @@ const encryption = require('./utils/encryption');
 
 const app = express();
 const port = process.env.PORT || 3001;
-/*
+
 const corsOptions = {
-    origin: ['https://lincestelecom.mx/'], // Orígenes permitidos
+    origin: ['https://eisip.net/'], // Orígenes permitidos
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 };
-app.use(cors(corsOptions)); */
-app.use(cors()); // eliminar esta linea luego y probar si sirve el cors
+app.use(cors(corsOptions)); 
 app.use(bodyParser.json({ limit: '20mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
