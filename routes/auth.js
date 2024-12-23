@@ -23,7 +23,8 @@ module.exports = (db) => {
             const token = jwt.sign({ id: user.id, role: user.role }, SECRET_KEY, { expiresIn: '1h' });
             res.status(200).json({ token });
         } catch (error) {
-            res.status(500).json({ message: 'Error en el servidor' });
+            console.error(error);  // Muestra el error en la consola del servidor
+            res.status(500).json({ message: 'Error en el servidor', error: error.message });
         }
     });
     

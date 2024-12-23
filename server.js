@@ -7,12 +7,19 @@ const bodyParser = require('body-parser');
 const path = require('path');
 require('dotenv').config();
 const multer = require('multer');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 const port = process.env.PORT || 3001;
-
-app.use(cors());
-app.use(bodyParser.json());
+/*
+const corsOptions = {
+    origin: ['https://lincestelecom.mx/'], // Orígenes permitidos
+    methods: ['GET', 'POST', 'PUT', 'DELETE'],
+    credentials: true
+};
+app.use(cors(corsOptions)); */
+app.use(cors()); // eliminar esta linea luego y probar si sirve el cors
+app.use(bodyParser.json({ limit: '20mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 let db;
@@ -21,9 +28,20 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
 });
-const upload = multer({ storage });
+const upload = multer({
+    storage,
+    fileFilter: (req, file, cb) => {
+        const allowedTypes = /jpeg|jpg|png|pdf/;
+        const extname = allowedTypes.test(path.extname(file.originalname).toLowerCase());
+        const mimetype = allowedTypes.test(file.mimetype);
 
-async function initializeDbConnection() {
+        if (extname && mimetype) {
+            return cb(null, true);
+        } else {
+            cb(new Error('Tipo de archivo no permitido'));
+        }
+    }
+});async function initializeDbConnection() {
     try {
         db = await mysql.createPool({
             host: process.env.DB_HOST,
@@ -55,3 +73,9 @@ async function initializeDbConnection() {
 }
 
 initializeDbConnection();
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error(err); // Log the error for debugging
+    res.status(500).json({ error: 'Algo salió mal, por favor intente más tarde.' });
+});
