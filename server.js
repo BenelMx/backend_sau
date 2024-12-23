@@ -8,6 +8,7 @@ const path = require('path');
 require('dotenv').config();
 const multer = require('multer');
 const jwt = require('jsonwebtoken');
+const encryption = require('./utils/encryption');
 
 const app = express();
 const port = process.env.PORT || 3001;
@@ -28,6 +29,7 @@ const storage = multer.diskStorage({
     destination: (req, file, cb) => cb(null, 'uploads/'),
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname),
 });
+
 const upload = multer({
     storage,
     fileFilter: (req, file, cb) => {
@@ -41,7 +43,21 @@ const upload = multer({
             cb(new Error('Tipo de archivo no permitido'));
         }
     }
-});async function initializeDbConnection() {
+});
+
+// Fields to encrypt in the database
+const ENCRYPTED_FIELDS = [
+    'nombres',
+    'apellidos',
+    'direccion',
+    'telefono',
+    'email',
+    'observaciones',
+    'cuenta_depositar',
+    'numero_referencia'
+];
+
+async function initializeDbConnection() {
     try {
         db = await mysql.createPool({
             host: process.env.DB_HOST,
@@ -53,7 +69,7 @@ const upload = multer({
         });
         console.log('Connected to the database');
 
-        const clientesRoutes = require('./routes/clientes')(db);
+        const clientesRoutes = require('./routes/clientes')(db, encryption, ENCRYPTED_FIELDS);
         const pagosRoutes = require('./routes/pagos')(db, upload);
         const authRoutes = require('./routes/auth')(db);
         const soporteRoutes = require('./routes/soporte')(db);

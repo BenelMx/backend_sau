@@ -3,7 +3,23 @@
 const express = require('express');
 const router = express.Router();
 
-module.exports = (db) => {
+module.exports = (db, encryption, ENCRYPTED_FIELDS) => {
+
+    // Middleware to decrypt response data
+    const decryptResponse = (req, res, next) => {
+        const originalJson = res.json;
+        res.json = function(data) {
+            if (Array.isArray(data)) {
+                data = data.map(item => encryption.decryptFields(item, ENCRYPTED_FIELDS));
+            } else if (data && typeof data === 'object') {
+                data = encryption.decryptFields(data, ENCRYPTED_FIELDS);
+            }
+            return originalJson.call(this, data);
+        };
+        next();
+    };
+
+    router.use(decryptResponse);
 
     // Obtener las células únicas de los clientes
     router.get('/celulas', async (req, res) => {
@@ -101,11 +117,15 @@ module.exports = (db) => {
 
     // Crea un nuevo cliente
     router.post('/', async (req, res) => {
-        const { pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia } = req.body;
+        const clientData = encryption.encryptFields(req.body, ENCRYPTED_FIELDS);
         try {
+            const fields = Object.keys(clientData).join(', ');
+            const placeholders = Object.keys(clientData).map(() => '?').join(', ');
+            const values = Object.values(clientData);
+
             await db.query(
-                'INSERT INTO clientes (pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
-                [pppoe, nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia]
+                `INSERT INTO clientes (${fields}) VALUES (${placeholders})`,
+                values
             );
             res.status(201).json({ message: 'Client created' });
         } catch (error) {
@@ -115,12 +135,16 @@ module.exports = (db) => {
 
     // Actualiza un cliente existente
     router.put('/:pppoe', async (req, res) => {
-        const { pppoe } = req.params;
-        const { nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia } = req.body;
+        const clientData = encryption.encryptFields(req.body, ENCRYPTED_FIELDS);
         try {
+            const setClause = Object.keys(clientData)
+                .map(key => `${key} = ?`)
+                .join(', ');
+            const values = [...Object.values(clientData), req.params.pppoe];
+
             await db.query(
-                'UPDATE clientes SET nombres = ?, apellidos = ?, ciudad = ?, direccion = ?, estado = ?, telefono = ?, email = ?, fecha_registro = ?, fecha_corte = ?, tipo_paquete = ?, monto_mensual = ?, municipio = ?, observaciones = ?, status = ?, celula = ?, cuenta_depositar = ?, numero_referencia = ? WHERE pppoe = ?',
-                [nombres, apellidos, ciudad, direccion, estado, telefono, email, fecha_registro, fecha_corte, tipo_paquete, monto_mensual, municipio, observaciones, status, celula, cuenta_depositar, numero_referencia, pppoe]
+                `UPDATE clientes SET ${setClause} WHERE pppoe = ?`,
+                values
             );
             res.json({ message: 'Client updated' });
         } catch (error) {
