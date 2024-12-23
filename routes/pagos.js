@@ -2,8 +2,26 @@
 
 const express = require('express');
 const router = express.Router();
+const encryption = require('../utils/encryption');
 
-module.exports = (db, upload) => {
+module.exports = (db, upload, encryption, ENCRYPTED_FIELDS_PAGOS) => {
+
+    // Middleware to decrypt response data
+    const decryptResponse = (req, res, next) => {
+        const originalJson = res.json;
+        res.json = function(data) {
+            if (Array.isArray(data)) {
+                data = data.map(item => encryption.decryptFields(item, ENCRYPTED_FIELDS_PAGOS));
+            } else if (data && typeof data === 'object') {
+                data = encryption.decryptFields(data, ENCRYPTED_FIELDS_PAGOS);
+            }
+            return originalJson.call(this, data);
+        };
+        next();
+    };
+
+    router.use(decryptResponse);
+
     // Obtener todos los pagos
     router.get('/', async (req, res) => {
         try {
@@ -45,7 +63,11 @@ module.exports = (db, upload) => {
             const sql = `SELECT nombres, apellidos, estado, ciudad, celula, cuenta_depositar, numero_referencia FROM clientes WHERE pppoe = ?`;
             const [result] = await db.query(sql, [pppoe]);
             if (result.length > 0) {
-                res.json(result[0]);
+                // Desencriptar los campos de datos sensibles antes de enviar la respuesta
+                const clientData = encryption.decryptFields(result[0], [
+                    'nombres', 'apellidos', 'cuenta_depositar', 'numero_referencia'
+                ]);
+                res.json(clientData);
             } else {
                 res.status(404).send('Cliente no encontrado');
             }
@@ -57,16 +79,24 @@ module.exports = (db, upload) => {
 
     // Agregar un nuevo pago con archivo
     router.post('/', async (req, res) => {
-        const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante } = req.body;    
+        // Encriptar los campos especificados en ENCRYPTED_FIELDS_PAGOS
+        const paymentData = encryption.encryptFields(req.body, ENCRYPTED_FIELDS_PAGOS);
+        const { fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante } = paymentData;
+    
+        // Verificar que los campos obligatorios están presentes
         if (!fecha_pago || !monto || !Clientes_pppoe) {
             return res.status(400).json({ error: 'Faltan datos requeridos' });
         }    
+    
         try {
+            // Inserción en la base de datos
             const sql = `INSERT INTO pagos (fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante)
-            VALUES (?, ?, ?, ?, ?, ?)`;
+                         VALUES (?, ?, ?, ?, ?, ?)`;
             const values = [fecha_pago, monto, referencia_bancaria, descripcion, Clientes_pppoe, comprobante];
             const [result] = await db.query(sql, values);
-            res.status(201).json({ id_pagos: result.insertId, ...req.body });
+            
+            // Responder con el ID del nuevo pago y los datos encriptados
+            res.status(201).json({ id_pagos: result.insertId, ...paymentData });
         } catch (err) {
             console.error('Error adding payment record:', err);
             res.status(500).json({ error: 'Error adding payment record' });

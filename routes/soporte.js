@@ -2,6 +2,7 @@
 
 const express = require('express');
 const router = express.Router();
+const encryption = require('../utils/encryption');
 
 module.exports = (db) => {
 
@@ -65,7 +66,11 @@ module.exports = (db) => {
       const sql = `SELECT nombres, apellidos, telefono, estado, ciudad, celula FROM clientes WHERE pppoe = ?`;
       const [result] = await db.query(sql, [pppoe]);
       if (result.length > 0) {
-        res.json(result[0]);
+        // Desencriptar los campos de datos sensibles antes de enviar la respuesta
+        const clientData = encryption.decryptFields(result[0], [
+          'nombres', 'apellidos', 'telefono', 'estado', 'ciudad', 'ciudad'
+        ]);
+        res.json(clientData);
       } else {
         res.status(404).send('Cliente no encontrado');
       }

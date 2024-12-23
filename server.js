@@ -56,6 +56,9 @@ const ENCRYPTED_FIELDS = [
     'cuenta_depositar',
     'numero_referencia'
 ];
+const ENCRYPTED_FIELDS_PAGOS = [
+    'referencia_bancaria'
+];
 
 async function initializeDbConnection() {
     try {
@@ -70,7 +73,7 @@ async function initializeDbConnection() {
         console.log('Connected to the database');
 
         const clientesRoutes = require('./routes/clientes')(db, encryption, ENCRYPTED_FIELDS);
-        const pagosRoutes = require('./routes/pagos')(db, upload);
+        const pagosRoutes = require('./routes/pagos')(db, upload, encryption, ENCRYPTED_FIELDS_PAGOS);
         const authRoutes = require('./routes/auth')(db);
         const soporteRoutes = require('./routes/soporte')(db);
         const instalacionesRoutes = require('./routes/instalaciones')(db, upload);
