@@ -14,7 +14,9 @@ const app = express();
 const port = process.env.PORT || 3001;
 
 const corsOptions = {
-    origin: ['https://eisip.net/'], // Orígenes permitidos
+    origin: process.env.NODE_ENV === 'production' 
+        ? ['https://eisip.net'] 
+        : ['http://localhost:3000'],
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     credentials: true
 };

@@ -4,7 +4,6 @@ const express = require('express');
 const router = express.Router();
 const argon2 = require('argon2');
 const jwt = require('jsonwebtoken');
-const password = require('../utils/password');
 
 module.exports = (db) => {
     const SECRET_KEY = process.env.SECRET_KEY || 'mi_secreto_jwt';
@@ -17,7 +16,7 @@ module.exports = (db) => {
                 return res.status(401).json({ message: 'Usuario no encontrado' });
             }
             const user = rows[0];
-            const isMatch = await argon2.compare(password, user.password);
+            const isMatch = await argon2.verify(user.password, password);
             if (!isMatch) {
                 return res.status(401).json({ message: 'Contraseña incorrecta' });
             }
