@@ -4,6 +4,7 @@ const express = require('express');
 const router = express.Router();
 const encryption = require('../utils/encryption');
 
+
 module.exports = (db, upload) => {
 
     // Ruta para subir múltiples fotos de instalación
