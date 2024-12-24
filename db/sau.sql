@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Servidor: 127.0.0.1
--- Tiempo de generación: 24-12-2024 a las 00:05:44
+-- Tiempo de generación: 24-12-2024 a las 22:09:35
 -- Versión del servidor: 10.4.32-MariaDB
 -- Versión de PHP: 8.2.12
 
@@ -113,14 +113,13 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `password`, `role`, `created_at`) VALUES
-(1, 'Cristobal_Chambe', '$2b$10$emroDy4yPCNHwtbLC7sWL.uX7mqLxO9elnQaT7FN5FnHJ7BWXD2YK', 'admin', '2024-09-08 21:13:21'),
-(2, 'Ambar_Chambe', '$2b$10$OGWVfD.wXuEN6zZkcGsK9e6QtUNlRfXI/bdVjt6MSqWpdAcJ9V2Ai', NULL, '2024-09-09 00:50:31'),
-(3, 'Gema_Chambe', '$2b$10$k9AKzyN/5Yx56tCl9wRPmuz6a8xZDXf3W24RD2vd5keWvCV5KWg3m', NULL, '2024-09-09 00:57:44'),
-(4, 'Hugo_Chambe', '$2b$10$WTTHhV76BYxxfIV1dKfZ7uhS1E8sbsPr7N9wL/XRbo57kfvhnt/me', NULL, '2024-09-09 00:57:44'),
-(5, 'Mariela_Zambrano', '$2b$10$/H9.Mx1/CDZQB29YRLZr7eqDOxs60Wq8cFQIBVoBHZcEBMZPbCOyi', NULL, '2024-09-09 00:57:44'),
-(6, 'Paloma_Chambe', '$2b$10$e4D6tnInD8D3.GS2jI77mOrp5HXRcbTioa9dw3.zwCZCU.1qx8ikS', NULL, '2024-09-09 00:57:44'),
-(7, 'Raquel_Zambrano', '$2b$10$q55u.cidEkcSPBOnkoG8mueyof4FnI3/O/gtgkwJkOJfFyW2vC1U6', NULL, '2024-09-09 00:57:44'),
-(8, 'Emilio_Montes', '$2b$10$fPDCe6DWrm/7qXwkfCQ5JOP.g1K/CqqxF8jBKdlUI8VmBDvZGRh/W', NULL, '2024-09-09 00:57:44');
+(1, 'Cristobal_Chambe', '$argon2id$v=19$m=65536,t=3,p=4$scSZNYfkT3jHAiYYulJ2XQ$Nq2yBsqKcT8CpDLQgES2PgXaKZs0i28sfyCxhHSOpio', 'admin', '2024-09-08 21:13:21'),
+(2, 'Ambar_Chambe', '$argon2id$v=19$m=65536,t=3,p=4$G1JWJEBL/BILBvpLQY4QLg$iVOuoICuotWm2GrqncV18iKxyv2xY6QnUTzxbUXWQyo', NULL, '2024-09-09 00:50:31'),
+(3, 'Gema_Chambe', '$argon2id$v=19$m=65536,t=3,p=4$ESO/OooXbSzqWM1gK3g3Kw$MyhiIydUnIpNIpZTe8R6eG7dRh9snCNB8J/b+4mykaM', NULL, '2024-09-09 00:57:44'),
+(4, 'Hugo_Chambe', '$argon2id$v=19$m=65536,t=3,p=4$gVFUUZFOEPyK/FShxUPDtA$I8RCatZ4SejJpwY0Dvk5lh4Lgqg2QCuEZB05LkwETTs', NULL, '2024-09-09 00:57:44'),
+(5, 'Mariela_Zambrano', '$argon2id$v=19$m=65536,t=3,p=4$B6izhRwAb8H7aLmClWs7ZQ$zbZjNXcG0P/JAJglu2mWWqMboTwVgILhkpjuKeriy1U', NULL, '2024-09-09 00:57:44'),
+(6, 'Paloma_Chambe', '$argon2id$v=19$m=65536,t=3,p=4$xyGbEyJxBl0OLo11wcmkfg$acQQcX1e8wCgytDLHn1WboIEJQDK189o9D9oTQC3TqQ', NULL, '2024-09-09 00:57:44'),
+(7, 'Raquel_Zambrano', '$argon2id$v=19$m=65536,t=3,p=4$M6SWTV7yoC5HFrnSZ4kNxw$Vj+QyjuagVHfuHxJf5RU3pay8bVC/6FBPQZtj7GQZ4Y', NULL, '2024-09-09 00:57:44');
 
 --
 -- Índices para tablas volcadas
@@ -168,19 +167,19 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT de la tabla `instalaciones`
 --
 ALTER TABLE `instalaciones`
-  MODIFY `id_instalaciones` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id_instalaciones` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 
 --
 -- AUTO_INCREMENT de la tabla `pagos`
 --
 ALTER TABLE `pagos`
-  MODIFY `id_pagos` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=89;
+  MODIFY `id_pagos` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- AUTO_INCREMENT de la tabla `soporte`
 --
 ALTER TABLE `soporte`
-  MODIFY `id_soporte` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id_soporte` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT de la tabla `users`
