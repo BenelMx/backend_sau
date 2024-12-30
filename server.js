@@ -13,14 +13,7 @@ const encryption = require('./utils/encryption');
 const app = express();
 const port = process.env.PORT || 3001;
 
-const corsOptions = {
-    origin: process.env.NODE_ENV === 'production' 
-        ? ['https://eisip.net'] 
-        : ['http://localhost:3000'],
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    credentials: true
-};
-app.use(cors(corsOptions)); 
+app.use(cors()); 
 app.use(bodyParser.json({ limit: '20mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
